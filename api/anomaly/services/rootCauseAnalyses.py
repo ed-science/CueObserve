@@ -126,17 +126,18 @@ class RootCauseAnalyses:
             # removing anomalous point other than last one
             anomalyTimeISO = anomaly.data["anomalyLatest"]["anomalyTimeISO"]
             if (
-                not "anomalyLatest" in result
+                "anomalyLatest" not in result
                 or not result["anomalyLatest"]
                 or result["anomalyLatest"]["anomalyTimeISO"] != anomalyTimeISO
             ):
                 return output
 
             for row in result["anomalyData"]["actual"]:
-                if not (row["ds"] == anomalyTimeISO and row["anomaly"] == 15):
-                    row["anomaly"] = 1
-                else:
-                    row["anomaly"] = 6
+                row["anomaly"] = (
+                    6
+                    if (row["ds"] == anomalyTimeISO and row["anomaly"] == 15)
+                    else 1
+                )
 
             # removing prediction band
             result["anomalyData"]["band"] = result["anomalyData"]["band"][:-15]

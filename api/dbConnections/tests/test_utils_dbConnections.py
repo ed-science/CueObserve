@@ -97,10 +97,7 @@ def test_MSSQLConnection(client, populate_seed_data, mocker):
 	"""Testing if connection params in seed data are only needed"""
 	connectionType = ConnectionType.objects.get(name="MSSQL")
 	paramNames = list(ConnectionParam.objects.filter(connectionType=connectionType).values_list("name", flat=True))
-	params = {}
-	for name in paramNames:
-		params[name] = "test"
-
+	params = {name: "test" for name in paramNames}
 	mockResponse = mocker.patch(
 		"dbConnections.mssql.pyodbc.connect",
 		new=mock.MagicMock(
@@ -111,7 +108,7 @@ def test_MSSQLConnection(client, populate_seed_data, mocker):
 
 	data = {'name': 'test connection', 'description': '', 'connectionType_id': connectionType.id, 'params': params}
 	path = reverse("connections")
-	response = client.post(path, data, content_type="application/json")	
+	response = client.post(path, data, content_type="application/json")
 	assert response.status_code == 200
 	assert response.data["success"]
 	assert Connection.objects.all().count()
@@ -124,10 +121,7 @@ def test_ClickHouseConnection(client, populate_seed_data, mocker):
 	"""Testing if connection params in seed data are only needed"""
 	connectionType = ConnectionType.objects.get(name="ClickHouse")
 	paramNames = list(ConnectionParam.objects.filter(connectionType=connectionType).values_list("name", flat=True))
-	params = {}
-	for name in paramNames:
-		params[name] = "test"
-
+	params = {name: "test" for name in paramNames}
 	mockResponse = mocker.patch(
 		"dbConnections.clickhouse.ClickHouse.checkConnection",
 		new=mock.MagicMock(

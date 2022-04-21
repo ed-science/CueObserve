@@ -6,9 +6,7 @@ from prophet import Prophet
 
 def isAnomaly(lowBand, highBand, value):
     """Condition for anomaly on a certain row"""
-    if value < lowBand or value > highBand:
-        return True
-    return False
+    return value < lowBand or value > highBand
 
 
 def checkLatestAnomaly(df):
@@ -20,12 +18,8 @@ def checkLatestAnomaly(df):
         lastAnomalyRow = anomalies.iloc[-1]
         anomalyTime = lastAnomalyRow["ds"]
         higher = lastAnomalyRow["y"] > lastAnomalyRow["upper"]
-
-        per = 0
         denom = lastAnomalyRow["upper"] if higher else lastAnomalyRow["lower"]
-        if denom > 0:
-            per = int(100 * (abs(lastAnomalyRow["y"] - denom) / denom))
-
+        per = int(100 * (abs(lastAnomalyRow["y"] - denom) / denom)) if denom > 0 else 0
         return {
             "highOrLow": "high" if higher else "low",
             "value": float(lastAnomalyRow["y"]),
@@ -84,7 +78,7 @@ def prophetDetect(df, granularity, iterations=None):
     forecast = forecast[["ds", "y"]]
     forecast = pd.concat([lastActualRow, forecast], ignore_index=True)
     numActual = 45 if granularity == "day" else 24 * 7
-    output = {
+    return {
         "anomalyData": {
             "actual": df[-numActual:].to_dict("records"),
             "predicted": forecast.to_dict("records"),
@@ -92,4 +86,3 @@ def prophetDetect(df, granularity, iterations=None):
         },
         "anomalyLatest": anomalyLatest,
     }
-    return output

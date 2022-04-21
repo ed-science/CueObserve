@@ -13,7 +13,7 @@ from users.models import CustomUser
 from django.contrib.auth.models import Group
 # from commons.utils.token_generator import id_generator
 from django.conf import settings
-authenticationRequired= True if settings.AUTHENTICATION_REQUIRED == "True" else False
+authenticationRequired = settings.AUTHENTICATION_REQUIRED == "True"
 
 @pytest.fixture()
 def setup_user(db):

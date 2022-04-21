@@ -61,7 +61,7 @@ class SlackAlert:
 
 class EmailAlert:
 
-    def sendEmail(message, details, subject, anomalyId):
+    def sendEmail(self, details, subject, anomalyId):
         """
         Email alert with image
         """
@@ -76,8 +76,7 @@ class EmailAlert:
             imgByte = PlotChartService.anomalyChartToImgStr(anomalyId)
             subject, from_email, to = subject, settings.EMAIL_HOST_USER, sendEmailTo
             body_html = (
-                message
-                + details
+                (self + details)
                 + """
                 <html>
                     <body>
@@ -86,6 +85,7 @@ class EmailAlert:
                 </html>
                 """
             )
+
             msg = EmailMultiAlternatives(
                 subject, body_html, from_email=from_email, to=to
             )

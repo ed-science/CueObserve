@@ -17,5 +17,5 @@ def limitSql(sql: str):
     if "limit " in sql.lower():
         return sql
     # sql = copy(sql)
-    sql = sql + " limit 10"
+    sql = f"{sql} limit 10"
     return sql

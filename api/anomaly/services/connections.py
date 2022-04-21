@@ -47,9 +47,7 @@ class Connections:
         Gets connection details of given connection_id
         """
         connection = Connection.objects.get(id=connection_id)
-        params = {}
-        for val in connection.cpvc.all():
-            params[val.connectionParam.name] = val.value
+        params = {val.connectionParam.name: val.value for val in connection.cpvc.all()}
         return connection.connectionType.name, params
 
     @staticmethod

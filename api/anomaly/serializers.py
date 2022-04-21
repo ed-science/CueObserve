@@ -19,8 +19,7 @@ class ConnectionSerializer(serializers.ModelSerializer):
 
     def get_datasetCount(self, obj):
         connectionId = obj.id
-        datasetCount = Dataset.objects.filter(connection_id = connectionId).count()
-        return datasetCount
+        return Dataset.objects.filter(connection_id = connectionId).count()
 
     class Meta:
         model = Connection
@@ -40,10 +39,12 @@ class ConnectionDetailSerializer(serializers.ModelSerializer):
     connectionType = serializers.SerializerMethodField()
 
     def get_params(self, obj):
-        params = {}
-        for val in obj.cpvc.all():
-            params[val.connectionParam.name] = val.value if not val.connectionParam.isEncrypted else "**********"
-        return params
+        return {
+            val.connectionParam.name: "**********"
+            if val.connectionParam.isEncrypted
+            else val.value
+            for val in obj.cpvc.all()
+        }
 
     def get_connectionTypeId(self, obj):
         return obj.connectionType.id
@@ -70,12 +71,14 @@ class ConnectionTypeSerializer(serializers.ModelSerializer):
     def get_params(self, obj):
         paramList = []
         for param in obj.connectionTypeParam.all():
-            params = {}
-            params["id"] = param.id
-            params["name"] = param.name
-            params["label"] = param.label
-            params["isEncrypted"] = param.isEncrypted
-            params["properties"] = param.properties
+            params = {
+                "id": param.id,
+                "name": param.name,
+                "label": param.label,
+                "isEncrypted": param.isEncrypted,
+                "properties": param.properties,
+            }
+
             paramList.append(params)
         return paramList
 
@@ -125,11 +128,11 @@ class DatasetSerializer(serializers.ModelSerializer):
 
     def get_dimensions(self, obj):
         dimensions = json.loads(obj.dimensions) if obj.metrics else []
-        return dimensions if dimensions else []
+        return dimensions or []
 
     def get_metrics(self, obj):
         metrics = json.loads(obj.metrics) if obj.metrics else []
-        return metrics if metrics else []
+        return metrics or []
 
     class Meta:
         model = Dataset
@@ -163,14 +166,14 @@ class AnomalyDefinitionSerializer(serializers.ModelSerializer):
 
 
     def get_anomalyDef(self, obj):
-        params = {}
-        params["id"] = obj.id
-        params["metric"] = obj.metric
-        params["dimension"] = obj.dimension
-        params["highOrLow"] = obj.highOrLow
-        params["operation"] = obj.operation
-        params["value"] = obj.value
-        return params
+        return {
+            "id": obj.id,
+            "metric": obj.metric,
+            "dimension": obj.dimension,
+            "highOrLow": obj.highOrLow,
+            "operation": obj.operation,
+            "value": obj.value,
+        }
 
     def get_schedule(self, obj):
         name = None
@@ -180,35 +183,37 @@ class AnomalyDefinitionSerializer(serializers.ModelSerializer):
         return name
     
     def get_lastRun(self, obj):
-        runStatus = obj.runstatus_set.last()
-        if runStatus:
+        if runStatus := obj.runstatus_set.last():
             return runStatus.startTimestamp
     
     def get_lastRunStatus(self, obj):
-        runStatus = obj.runstatus_set.last()
-        if runStatus:
+        if runStatus := obj.runstatus_set.last():
             return runStatus.status
     
     def get_lastRunAnomalies(self, obj):
-        runStatus = obj.runstatus_set.last()
-        if runStatus:
+        if runStatus := obj.runstatus_set.last():
             runStatusObj = runStatus.logs
             runStatusObj["runStatusId"] = runStatus.id
             return runStatusObj
     
     def get_detectionRule(self, obj):
         if hasattr(obj, "detectionrule"):
-            detectionRule = {
+            return {
                 "id": obj.detectionrule.id,
                 "detectionRuleType": {
                     "id": obj.detectionrule.detectionRuleType.id,
                     "name": obj.detectionrule.detectionRuleType.name,
-                    "description": obj.detectionrule.detectionRuleType.description
+                    "description": obj.detectionrule.detectionRuleType.description,
                 },
-                "params": {param["param__name"]: param["value"] for param in obj.detectionrule.detectionruleparamvalue_set.all().values("param__name", "value")},
-                "detectionRuleStr": str(obj.detectionrule)
+                "params": {
+                    param["param__name"]: param["value"]
+                    for param in obj.detectionrule.detectionruleparamvalue_set.all().values(
+                        "param__name", "value"
+                    )
+                },
+                "detectionRuleStr": str(obj.detectionrule),
             }
-            return detectionRule
+
         else:
             return {"detectionRuleType": {"name": "Prophet"}, "params": {}, "detectionRuleStr": "Prophet"}
 
@@ -290,8 +295,9 @@ class ScheduleSerializer(serializers.ModelSerializer):
     def get_assignedSchedule(self, obj):
         """ Gets count of schedule assigned to Anomaly Definition"""
         cronId = Schedule.objects.get(id=obj.id).cronSchedule_id
-        count = AnomalyDefinition.objects.filter(periodicTask__crontab_id=cronId).count()
-        return count
+        return AnomalyDefinition.objects.filter(
+            periodicTask__crontab_id=cronId
+        ).count()
     class Meta:
         model = Schedule
         fields = ["id", "schedule","name","timezone","crontab", "assignedSchedule"]
@@ -335,9 +341,7 @@ class DetectionRuleTypeSerializer(serializers.ModelSerializer):
     def get_params(self, obj):
         paramList = []
         for param in obj.detectionruleparam_set.all():
-            params = {}
-            params["id"] = param.id
-            params["name"] = param.name
+            params = {"id": param.id, "name": param.name}
             paramList.append(params)
         return paramList
 

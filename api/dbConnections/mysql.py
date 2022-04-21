@@ -10,17 +10,17 @@ class MySQL:
     Class to support functionalities on MySQL connection
     """
 
-    def checkConnection(params):
+    def checkConnection(self):
         """ Function to connect mysql db """
         from MySQLdb import connect
 
         res = True
         try:
-            host = params.get("host", "")
-            port = int(params.get("port", 25060))
-            database = params.get("database", "")
-            username = params.get("username", "")
-            password = params.get("password", "")
+            host = self.get("host", "")
+            port = int(self.get("port", 25060))
+            database = self.get("database", "")
+            username = self.get("username", "")
+            password = self.get("password", "")
             conn = connect(
                 host=host, port=port, db=database, user=username, password=password
             )
@@ -30,17 +30,17 @@ class MySQL:
             res = False
         return res
 
-    def fetchDataframe(params: str, sql: str, limit: bool = False):
+    def fetchDataframe(self, sql: str, limit: bool = False):
         """ Function to fetch data from mysql db """
         from MySQLdb import connect
 
         dataframe = None
         try:
-            host = params.get("host", "")
-            port = int(params.get("port", 25060))
-            database = params.get("database", "")
-            username = params.get("username", "")
-            password = params.get("password", "")
+            host = self.get("host", "")
+            port = int(self.get("port", 25060))
+            database = self.get("database", "")
+            username = self.get("username", "")
+            password = self.get("password", "")
             conn = connect(
                 host=host, port=port, db=database, user=username, password=password
             )

@@ -28,7 +28,7 @@ class ConnectionParam(models.Model):  # no ui
     properties = models.JSONField(null=True, blank=True)  # for ui
 
     def __str__(self):
-        return self.connectionType.name + "_" + self.name
+        return f"{self.connectionType.name}_{self.name}"
 
 
 class Connection(models.Model):
@@ -176,7 +176,7 @@ class DetectionRuleParam(models.Model):
     )
 
     def __str__(self):
-        return self.detectionRuleType.name + "_" + self.name
+        return f"{self.detectionRuleType.name}_{self.name}"
 
 
 class DetectionRule(models.Model):

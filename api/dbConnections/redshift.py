@@ -20,8 +20,7 @@ class Redshift:
         username: str = params.get("username", "")
         password: str = params.get("password", "")
 
-        engine = create_engine(f"postgresql://{username}:{password}@{endpoint}")
-        return engine
+        return create_engine(f"postgresql://{username}:{password}@{endpoint}")
 
     @staticmethod
     def checkConnection(params: dict):

@@ -19,7 +19,7 @@ class MSSQL:
         server = params.get("host", "")
         username = params.get("username", "")
         password = params.get("password", "")
-        cnxn = pyodbc.connect(  # pylint: disable=I1101
+        return pyodbc.connect(  # pylint: disable=I1101
             "DRIVER={ODBC Driver 17 for SQL Server};SERVER="
             + server
             + ";UID="
@@ -27,7 +27,6 @@ class MSSQL:
             + ";PWD="
             + password
         )
-        return cnxn
 
     @staticmethod
     def checkConnection(params):

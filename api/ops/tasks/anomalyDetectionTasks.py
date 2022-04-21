@@ -37,10 +37,9 @@ def _anomalyDetectionSubTask(dimValObj, dfDict, anomalyDefProps, detectionRuleTy
     """
     Internal anomaly detection subtask to be grouped by celery for each anomaly object
     """
-    anomalyServiceResult = anomalyService(
+    return anomalyService(
         dimValObj, dfDict, anomalyDefProps, detectionRuleType, detectionParams
     )
-    return anomalyServiceResult
 
 async def _sendLambdaRequest(session, lambdaUrl, anomalyServiceObj):
     """
@@ -199,7 +198,7 @@ def anomalyDetectionJob(anomalyDef_id: int, manualRun: bool = False):
         logs["log"] = json.dumps(
             {anomaly["dimVal"]: anomaly for anomaly in result}
         )
-        allTasksSucceeded = all([anomalyTask["success"] for anomalyTask in result])
+        allTasksSucceeded = all(anomalyTask["success"] for anomalyTask in result)
     except Exception as ex:
         logs["log"] = json.dumps(
             {"stackTrace": traceback.format_exc(), "message": str(ex)}
@@ -254,7 +253,7 @@ def anomalyDetectionJob(anomalyDef_id: int, manualRun: bool = False):
 
             name = "anomalyAlert"
             SlackAlert.slackAlertHelper(title, message, name, details=details, anomalyId=anomalyId)
-        
+
             ################################################## Email Alert ############################################################
             numPublished = logs["numAnomaliesPulished"]
             messageHtml = f"{numPublished} {'anomalies' if numPublished > 1 else 'anomaly'} published. <br>"
@@ -266,21 +265,20 @@ def anomalyDetectionJob(anomalyDef_id: int, manualRun: bool = False):
                 messageHtml
                 + f"Dataset: {anomalyDefinition.dataset.name} <br>"
             )
-            messageHtml = (
-                messageHtml +  f"Granularity: {anomalyDefinition.dataset.granularity} <br> <br>"
-            )
+            messageHtml = f"{messageHtml}Granularity: {anomalyDefinition.dataset.granularity} <br> <br>"
+
             emailSubject = (
                 html2text.html2text(Template(cardTemplate.title).render(Context(data))).replace("**", "").replace("\n","")
-            
+
             )
-            detailsHtml = Template(cardTemplate.title).render(Context(data)) + "<br>"
+            detailsHtml = f"{Template(cardTemplate.title).render(Context(data))}<br>"
             subjectHtml = emailSubject
-           
+
             detailsHtml = detailsHtml + Template(cardTemplate.bodyText).render(Context(data)) +"<br>"
             EmailAlert.sendEmail(messageHtml, detailsHtml, subjectHtml, anomalyId)
 
             ############################################################### Webhook Alert #############################################################################
-            
+
             numPublished = logs["numAnomaliesPulished"]
             webhookAlertMessageFormat(numPublished, anomalyDefinition)
 
@@ -294,7 +292,7 @@ def anomalyDetectionJob(anomalyDef_id: int, manualRun: bool = False):
         name = "appAlert"
         event_logs(anomalyDef_id,runStatusObj.status, totalAnomalyPublished ,totalAnomalyCount )
         SlackAlert.slackAlertHelper(title, message, name)
-        
+
         ############ Webhook Alert ############
         WebHookAlert.webhookAlertHelper(name, title, message)
 
@@ -319,9 +317,8 @@ def webhookAlertMessageFormat(numPublished, anomalyDefinition: AnomalyDefinition
             textMessage
             + f"Dataset: {anomalyDefinition.dataset.name}" + ", "
         )
-        textMessage = (
-            textMessage +  f"Granularity: {anomalyDefinition.dataset.granularity}" + ", "
-        )
+        textMessage = f"{textMessage}Granularity: {anomalyDefinition.dataset.granularity}, "
+
         highestContriAnomaly = anomalyDefinition.anomaly_set.order_by(
             "data__contribution"
         ).last()
@@ -332,9 +329,9 @@ def webhookAlertMessageFormat(numPublished, anomalyDefinition: AnomalyDefinition
         data.update(data["data"]["anomalyLatest"])
         textSubject = (
             html2text.html2text(Template(cardTemplate.title).render(Context(data))).replace("**", "").replace("\n","")
-        
+
         )
-        textDetails = Template(cardTemplate.title).render(Context(data)) + " "
+        textDetails = f"{Template(cardTemplate.title).render(Context(data))} "
         textDetails = textDetails + Template(cardTemplate.bodyText).render(Context(data)) + " "
         textDetails = textDetails.replace("<b>", "").replace("</b>", "")
         name = "anomalyAlert"

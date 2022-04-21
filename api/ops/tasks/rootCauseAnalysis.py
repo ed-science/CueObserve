@@ -41,10 +41,14 @@ def _anomalyDetectionForValue(
     from anomaly.services import RootCauseAnalyses
 
     try:
-        anomalyServiceResult = RootCauseAnalyses.createRCAAnomaly(
-            anomalyId, dimension, dimensionVal, contriPercent, pd.DataFrame(dfDict)
+        return RootCauseAnalyses.createRCAAnomaly(
+            anomalyId,
+            dimension,
+            dimensionVal,
+            contriPercent,
+            pd.DataFrame(dfDict),
         )
-        return anomalyServiceResult
+
     except Exception as ex:
         return False
 
