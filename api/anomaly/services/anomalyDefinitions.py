@@ -72,26 +72,29 @@ class AnomalyDefinitions:
         sortingPrefix = "" if order == "ascend" else "-"
 
         if columnToSort == "datasetName":
-            anomalyDefObjs = anomalyDefObjs.order_by(sortingPrefix + "dataset__name")
+            anomalyDefObjs = anomalyDefObjs.order_by(f"{sortingPrefix}dataset__name")
 
         if columnToSort == "granularity":
             anomalyDefObjs = anomalyDefObjs.order_by(
-                sortingPrefix + "dataset__granularity"
+                f"{sortingPrefix}dataset__granularity"
             )
 
+
         if columnToSort == "anomalyDef":
-            anomalyDefObjs = anomalyDefObjs.order_by(sortingPrefix + "metric")
+            anomalyDefObjs = anomalyDefObjs.order_by(f"{sortingPrefix}metric")
 
         if columnToSort == "lastRun":
             anomalyDefObjs = anomalyDefObjs.annotate(
                 latestRun=Max("runstatus__startTimestamp")
-            ).order_by(sortingPrefix + "latestRun")
+            ).order_by(f"{sortingPrefix}latestRun")
+
             return anomalyDefObjs
 
         if columnToSort == "lastRunStatus":
             anomalyDefObjs = anomalyDefObjs.annotate(
                 latestRun=Max("runstatus__status")
-            ).order_by(sortingPrefix + "latestRun")
+            ).order_by(f"{sortingPrefix}latestRun")
+
 
         return anomalyDefObjs
 
@@ -122,11 +125,10 @@ class AnomalyDefinitions:
             detectionRuleType_id=detectionRuleTypeId, anomalyDefinition=anomalyObj
         )
         detectionParams = []
-        for param in detectionRuleParams.keys():
-            detectionRuleParamObj = DetectionRuleParam.objects.filter(
+        for param in detectionRuleParams:
+            if detectionRuleParamObj := DetectionRuleParam.objects.filter(
                 name=param
-            ).first()
-            if detectionRuleParamObj:
+            ).first():
                 detectionParams.append(
                     DetectionRuleParamValue(
                         param=detectionRuleParamObj,
@@ -190,7 +192,6 @@ class AnomalyDefinitions:
         :param runStatusOffset: Offset for fetching run statuses
         """
         res = ApiResponse()
-        runStatusData = {}
         runStatuses = RunStatus.objects.filter(
             anomalyDefinition_id=anomalyDefId
         ).order_by("-startTimestamp")[
@@ -199,7 +200,10 @@ class AnomalyDefinitions:
         runStatuseCount = RunStatus.objects.filter(
             anomalyDefinition_id=anomalyDefId
         ).count()
-        runStatusData["runStatuses"] = RunStatusSerializer(runStatuses, many=True).data
+        runStatusData = {
+            "runStatuses": RunStatusSerializer(runStatuses, many=True).data
+        }
+
         runStatusData["count"] = runStatuseCount
         res.update(True, "Run statuses retrieved successfully", runStatusData)
         return res
@@ -211,11 +215,16 @@ class AnomalyDefinitions:
         :param anomalyDefId: ID of the Anomaly Definition
         """
         res = ApiResponse()
-        lastRunStatus = RunStatus.objects.filter(anomalyDefinition_id=anomalyDefId).order_by("-startTimestamp").first()
-        
-        taskRunning = False
-        if lastRunStatus:
+        if (
+            lastRunStatus := RunStatus.objects.filter(
+                anomalyDefinition_id=anomalyDefId
+            )
+            .order_by("-startTimestamp")
+            .first()
+        ):
             taskRunning = lastRunStatus.status == "RUNNING"
+        else:
+            taskRunning = False
         res.update(True, "Task Running status checked.", {"isRunning": taskRunning})
         return res
 

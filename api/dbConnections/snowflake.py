@@ -20,10 +20,9 @@ class Snowflake:
         password: str = params.get("password", "")
         account: str = params.get("account", "")
 
-        ctx = snowflake.connector.connect(  # pylint: disable=E1101
+        return snowflake.connector.connect(  # pylint: disable=E1101
             user=user, password=password, account=account
         )
-        return ctx
 
     @staticmethod
     def checkConnection(params: dict):

@@ -46,13 +46,14 @@ class Data:
 
     @staticmethod
     def fetchDatasetDataframe(dataset):
-        connectionParams = {}
-        for val in dataset.connection.cpvc.all():
-            connectionParams[val.connectionParam.name] = val.value
-        datasetDf = Data.runQueryOnConnection(
+        connectionParams = {
+            val.connectionParam.name: val.value
+            for val in dataset.connection.cpvc.all()
+        }
+
+        return Data.runQueryOnConnection(
             dataset.connection.connectionType.name,
             connectionParams,
             dataset.sql,
             False,
         )
-        return datasetDf

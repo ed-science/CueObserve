@@ -44,10 +44,7 @@ def lifetimeDetect(df, granularity):
     anomalyLatest = checkLatestAnomaly(df)
     df = df[["ds", "y", "anomaly"]]
     numActual = 45 if granularity == "day" else 24 * 7
-    output = {
-        "anomalyData": {
-            "actual": df[-numActual:].to_dict("records")
-        },
-        "anomalyLatest": anomalyLatest
+    return {
+        "anomalyData": {"actual": df[-numActual:].to_dict("records")},
+        "anomalyLatest": anomalyLatest,
     }
-    return output

@@ -20,12 +20,9 @@ def getInstallationId():
         if not InstallationTable.objects.all().exists():
             userId = ''.join(random.choices(string.ascii_uppercase + string.digits, k=16))
             dbType = ""
-            if os.environ.get("POSTGRES_DB_HOST", False):
-                dbType = "postgres"
-            else:
-                dbType = "sqlite"
+            dbType = "postgres" if os.environ.get("POSTGRES_DB_HOST", False) else "sqlite"
             userObj = InstallationTable.objects.create(installationId = userId, databaseType = dbType)
-            
+
             data = {"installationId": userObj.installationId}
             res.update(True, "Installation Id created and fetched successfully", data)
         else:
@@ -58,16 +55,19 @@ def event_logs(anomalyDef_id,status, publishedCount, totalCount):
         split = "Y" if adf.dimension else "N"
         splitLimit = adf.operation
         algorithm = adf.detectionrule.detectionRuleType.name
-        definitionOperation = adf.operation if adf.operation else ""
-        definitionHighOrLow = adf.highOrLow if adf.highOrLow else ""
-        operationValue = adf.value if adf.value else ""
-        definitionString = definitionOperation + " " + operationValue + " " + definitionHighOrLow
+        definitionOperation = adf.operation or ""
+        definitionHighOrLow = adf.highOrLow or ""
+        operationValue = adf.value or ""
+        definitionString = (
+            f"{definitionOperation} {operationValue} {definitionHighOrLow}"
+        )
+
         scheduleCron = "* * * * *"
         scheduleTimeZone = ""
         if adf.periodicTask:
             scheduleCron = adf.periodicTask.crontab.minute + adf.periodicTask.crontab.hour + adf.periodicTask.crontab.day_of_month + adf.periodicTask.crontab.month_of_year + adf.periodicTask.crontab.day_of_week 
             scheduleTimeZone = adf.periodicTask.crontab.timezone.zone
-        
+
         analytics.track(userId, 'AnomalyRan', {
             "datasetConnection": datasetConnection,
             "datasetGranularity": datasetGranularity,		
@@ -103,13 +103,12 @@ def update_traits():
         anomalyObjs = AnomalyDefinition.objects.all()
         settings = Setting.objects.exclude(value="").count()
         anomalyDefCount = anomalyObjs.count()
-        anomalyDefinitionScheduleCount = 0
-        for obj in anomalyObjs:
-            if obj.periodicTask:
-                anomalyDefinitionScheduleCount += 1
+        anomalyDefinitionScheduleCount = sum(
+            1 for obj in anomalyObjs if obj.periodicTask
+        )
 
         analytics.identify(userId, {
-        
+
         "createdAt": createdAt,  # Read from table , trigger at every event_log while anomaly definition run
         "connections": connCount,
         "datasets": datasetCount,

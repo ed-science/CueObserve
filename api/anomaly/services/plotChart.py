@@ -81,8 +81,5 @@ class PlotChartService:
         fig.update_xaxes(
             # dtick="M48",   # display x-ticks every 24 months months
             tickformat="%Y-%m-%d" if granularity == "day" else "%Y-%m-%d 00:00" # date format
-        ) 
-        # fig.show() # use to see chart locally
-        imgBytes = fig.to_image(format="png") # pass img_bytes instead of png file
-
-        return imgBytes
+        )
+        return fig.to_image(format="png")

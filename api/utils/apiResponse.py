@@ -26,5 +26,4 @@ class ApiResponse:
         """
         Method to return response in serialized dict form
         """
-        obj = {"success": self.success, "message": self.message, "data": self.data}
-        return obj
+        return {"success": self.success, "message": self.message, "data": self.data}

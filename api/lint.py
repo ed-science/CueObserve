@@ -39,19 +39,11 @@ final_score = (
 
 if final_score < threshold:
 
-    message = (
-        "PyLint Failed | "
-        "Score: {} | "
-        "Threshold: {} ".format(final_score, threshold)
-    )
+    message = f"PyLint Failed | Score: {final_score} | Threshold: {threshold} "
 
     raise Exception(message)
 
 else:
-    message = (
-        "PyLint Passed | "
-        "Score: {} | "
-        "Threshold: {} ".format(final_score, threshold)
-    )
+    message = f"PyLint Passed | Score: {final_score} | Threshold: {threshold} "
 
     exit(0)

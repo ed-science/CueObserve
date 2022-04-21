@@ -30,7 +30,7 @@ class LoginRequiredMiddleware:
     def __call__(self, request):
         return self.get_response(request)
 
-    def process_view(self, request, view_func, view_args, view_kwargs):  # pylint: disable=C0103
+    def process_view(self, request, view_func, view_args, view_kwargs):    # pylint: disable=C0103
         """
         Process view method to check login_exempt decorator and enforce authentication on all views
         """
@@ -40,10 +40,10 @@ class LoginRequiredMiddleware:
                 return
         except:
             pass
-        authenticationRequired= True if settings.AUTHENTICATION_REQUIRED == "True" else False
+        authenticationRequired = settings.AUTHENTICATION_REQUIRED == "True"
 
         if not authenticationRequired:
-            return 
+            return
         if getattr(view_func, "login_exempt", False):
             return
 

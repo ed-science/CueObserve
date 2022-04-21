@@ -10,14 +10,14 @@ class Postgres:
     """
     Class to support functionalities on MySQL connection
     """
-    def checkConnection(params):
+    def checkConnection(self):
         res = True
         try:
-            host = params.get("host", "")
-            port = int(params.get("port", 25060))
-            database = params.get("database", "")
-            user= params.get("username","")
-            password = params.get("password", "")
+            host = self.get("host", "")
+            port = int(self.get("port", 25060))
+            database = self.get("database", "")
+            user = self.get("username", "")
+            password = self.get("password", "")
             conn = connect(
             host=host,
             port=port,
@@ -32,14 +32,14 @@ class Postgres:
             res = False
         return res
 
-    def fetchDataframe(params: str, sql: str, limit: bool = False):
+    def fetchDataframe(self, sql: str, limit: bool = False):
         dataframe = None
         try:
-            host = params.get("host", "")
-            port = int(params.get("port", 25060))
-            database = params.get("database", "")
-            user= params.get("username","")
-            password = params.get("password", "")
+            host = self.get("host", "")
+            port = int(self.get("port", 25060))
+            database = self.get("database", "")
+            user = self.get("username", "")
+            password = self.get("password", "")
             conn = connect(
             host=host,
             port=port,
@@ -52,7 +52,7 @@ class Postgres:
                 sql = limitSql(sql)
             chunksize =  None
             dataframe = pd.read_sql(sql, conn, chunksize=chunksize)
-            
+
         except Exception as ex:
             logger.error("Can't connect to db with this credentials %s", str(ex))
 

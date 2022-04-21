@@ -158,12 +158,12 @@ def test_datasets(client, mocker):
         'DeliveryPostalCode': '452001',
         'RefundAmount': Decimal('0E-9'),
         'ReceivedQty': Decimal('0E-9')}]
-    
+
     datasetDf = pd.DataFrame(fakedata)
     dimValsData = prepareAnomalyDataframes(datasetDf, timestampCol="CREATEDTS", metricCol="ReceivedQty", operation="Top")
     assert (dimValsData[0]["df"].columns == ['ds', 'y']).all()
     assert dimValsData[0]["df"].iloc[0]["y"] == 18
-    assert dimValsData[0]["dimVal"] == None
+    assert dimValsData[0]["dimVal"] is None
 
     dimValsData = prepareAnomalyDataframes(datasetDf, timestampCol="CREATEDTS", metricCol="ReceivedQty",dimensionCol="DeliveryCity", operation="Min % Contribution", value=1)
     assert (dimValsData[0]["df"].columns == ['ds', 'y']).all()
